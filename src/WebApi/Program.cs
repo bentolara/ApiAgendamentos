@@ -2,11 +2,8 @@ using Application.Interfaces;
 using Application.Mappings;
 using Application.Services;
 using Application.Validators;
-using Domain.Interfaces;
 using FluentValidation;
-using Infrastructure.Persistence;
-using Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
+using Infrastructure.Calendar;
 using Serilog;
 using WebApi.Middlewares;
 
@@ -37,12 +34,8 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configurar Entity Framework Core (InMemory)
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseInMemoryDatabase("AgendamentosDb"));
-
-// Configurar Repositórios
-builder.Services.AddScoped<IAgendamentoRepository, AgendamentoRepository>();
+// Configurar Google Calendar Service
+builder.Services.AddSingleton<ICalendarService, GoogleCalendarService>();
 
 // Configurar Services
 builder.Services.AddScoped<IAgendamentoService, AgendamentoService>();
@@ -71,12 +64,5 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();
-
-// Garantir que o banco de dados seja criado
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    context.Database.EnsureCreated();
-}
 
 app.Run();

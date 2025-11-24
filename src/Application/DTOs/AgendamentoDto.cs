@@ -10,5 +10,6 @@ public class AgendamentoDto
     public string? Observacoes { get; set; }
     public DateTime DataCriacao { get; set; }
     public DateTime? DataAtualizacao { get; set; }
+    public string? GoogleCalendarEventId { get; set; }
 }
 

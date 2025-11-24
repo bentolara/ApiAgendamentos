@@ -1,9 +1,9 @@
 using Application.DTOs;
+using Application.Interfaces;
 using Application.Services;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Exceptions;
-using Domain.Interfaces;
 using FluentAssertions;
 using Moq;
 using Xunit;
@@ -12,15 +12,15 @@ namespace Application.Tests.Services;
 
 public class AgendamentoServiceTests
 {
-    private readonly Mock<IAgendamentoRepository> _repositoryMock;
+    private readonly Mock<ICalendarService> _calendarServiceMock;
     private readonly Mock<IMapper> _mapperMock;
     private readonly AgendamentoService _service;
 
     public AgendamentoServiceTests()
     {
-        _repositoryMock = new Mock<IAgendamentoRepository>();
+        _calendarServiceMock = new Mock<ICalendarService>();
         _mapperMock = new Mock<IMapper>();
-        _service = new AgendamentoService(_repositoryMock.Object, _mapperMock.Object);
+        _service = new AgendamentoService(_calendarServiceMock.Object, _mapperMock.Object);
     }
 
     [Fact]
@@ -41,7 +41,8 @@ public class AgendamentoServiceTests
             ClienteNome = dto.ClienteNome,
             ClienteTelefone = dto.ClienteTelefone,
             DataHoraInicio = dto.DataHoraInicio,
-            DataHoraFim = dto.DataHoraFim
+            DataHoraFim = dto.DataHoraFim,
+            GoogleCalendarEventId = "event123"
         };
 
         var agendamentoDto = new AgendamentoDto
@@ -50,16 +51,26 @@ public class AgendamentoServiceTests
             ClienteNome = agendamento.ClienteNome,
             ClienteTelefone = agendamento.ClienteTelefone,
             DataHoraInicio = agendamento.DataHoraInicio,
-            DataHoraFim = agendamento.DataHoraFim
+            DataHoraFim = agendamento.DataHoraFim,
+            GoogleCalendarEventId = agendamento.GoogleCalendarEventId
         };
 
-        _repositoryMock.Setup(r => r.ExisteConflitoHorarioAsync(
+        var calendarEvent = new GoogleCalendarEvent
+        {
+            Id = "event123",
+            Summary = $"{agendamento.ClienteNome} - Agendamento",
+            Start = agendamento.DataHoraInicio,
+            End = agendamento.DataHoraFim
+        };
+
+        _calendarServiceMock.Setup(c => c.ExisteConflitoHorarioAsync(
             It.IsAny<DateTime>(), It.IsAny<DateTime>(), null))
             .ReturnsAsync(false);
 
         _mapperMock.Setup(m => m.Map<Agendamento>(dto)).Returns(agendamento);
-        _mapperMock.Setup(m => m.Map<AgendamentoDto>(agendamento)).Returns(agendamentoDto);
-        _repositoryMock.Setup(r => r.AddAsync(It.IsAny<Agendamento>())).ReturnsAsync(agendamento);
+        _mapperMock.Setup(m => m.Map<AgendamentoDto>(It.IsAny<Agendamento>())).Returns(agendamentoDto);
+        _calendarServiceMock.Setup(c => c.CreateEventAsync(It.IsAny<Agendamento>()))
+            .ReturnsAsync(calendarEvent);
 
         // Act
         var result = await _service.CriarAsync(dto);
@@ -67,7 +78,7 @@ public class AgendamentoServiceTests
         // Assert
         result.Should().NotBeNull();
         result.ClienteNome.Should().Be(dto.ClienteNome);
-        _repositoryMock.Verify(r => r.AddAsync(It.IsAny<Agendamento>()), Times.Once);
+        _calendarServiceMock.Verify(c => c.CreateEventAsync(It.IsAny<Agendamento>()), Times.Once);
     }
 
     [Fact]
@@ -84,7 +95,7 @@ public class AgendamentoServiceTests
 
         var agendamento = new Agendamento();
 
-        _repositoryMock.Setup(r => r.ExisteConflitoHorarioAsync(
+        _calendarServiceMock.Setup(c => c.ExisteConflitoHorarioAsync(
             It.IsAny<DateTime>(), It.IsAny<DateTime>(), null))
             .ReturnsAsync(true);
 
@@ -99,7 +110,8 @@ public class AgendamentoServiceTests
     {
         // Arrange
         var id = Guid.NewGuid();
-        _repositoryMock.Setup(r => r.GetByIdAsync(id)).ReturnsAsync((Agendamento?)null);
+        _calendarServiceMock.Setup(c => c.ListEventsAsync(It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<GoogleCalendarEvent>());
 
         // Act
         var result = await _service.ObterPorIdAsync(id);
@@ -113,7 +125,8 @@ public class AgendamentoServiceTests
     {
         // Arrange
         var id = Guid.NewGuid();
-        _repositoryMock.Setup(r => r.ExistsAsync(id)).ReturnsAsync(false);
+        _calendarServiceMock.Setup(c => c.ListEventsAsync(It.IsAny<DateTime>()))
+            .ReturnsAsync(new List<GoogleCalendarEvent>());
 
         // Act & Assert
         await Assert.ThrowsAsync<DomainException>(() => _service.DeletarAsync(id));
