@@ -6,14 +6,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Apis.Calendar.v3" Version="1.68.0.3364" />
-    <PackageReference Include="Google.Apis.Auth" Version="1.68.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="google-credentials.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
   </ItemGroup>
 
   <PropertyGroup>
