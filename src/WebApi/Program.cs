@@ -5,12 +5,11 @@ using Application.Validators;
 using FluentValidation;
 using Infrastructure.Calendar;
 using Serilog;
-using WebApi.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configurar Serilog
-Log.Logger = new LoggerConfiguration()
+/*Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
     .WriteTo.Console()
@@ -33,7 +32,7 @@ builder.Services.AddSwaggerGen(c =>
         Description = "API REST para gerenciamento de agendamentos usando Clean Architecture"
     });
 });
-
+*/
 // Configurar Google Calendar Service
 builder.Services.AddSingleton<ICalendarService, GoogleCalendarService>();
 
@@ -50,19 +49,20 @@ builder.Services.AddValidatorsFromAssemblyContaining<AtualizarAgendamentoDtoVali
 var app = builder.Build();
 
 // Configurar o pipeline HTTP
-if (app.Environment.IsDevelopment())
+/*if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+
 
 // Middleware de tratamento de exceções
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();*/
+app.UseHttpsRedirection();
 
-app.UseAuthorization();
+//app.UseAuthorization();
 
-app.MapControllers();
+//app.MapControllers();
 
 app.Run();

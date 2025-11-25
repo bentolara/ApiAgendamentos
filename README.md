@@ -1,6 +1,8 @@
-# API de Agendamentos
+# Servidor MCP - Agendamentos
 
-API REST para gerenciamento de agendamentos usando Clean Architecture e integração com Google Calendar.
+Servidor MCP (Model Context Protocol) para gerenciamento de agendamentos usando Clean Architecture e integração com Google Calendar.
+
+Este projeto foi migrado de uma API REST para um servidor MCP, permitindo que seja consumido por ChatGPT, agentes OpenAI e outras aplicações MCP Client.
 
 ## 🏗️ Arquitetura
 
@@ -9,7 +11,8 @@ O projeto segue os princípios da Clean Architecture com as seguintes camadas:
 - **Domain**: Entidades e interfaces de domínio
 - **Application**: Casos de uso, DTOs, validações e serviços de aplicação
 - **Infrastructure**: Implementações de serviços externos (Google Calendar)
-- **WebApi**: Controllers, middlewares e configuração da aplicação
+- **Tools**: Ferramentas MCP que expõem os casos de uso
+- **McpServer**: Servidor MCP que gerencia comunicação via STDIO
 
 ## 🔧 Configuração
 
@@ -63,28 +66,31 @@ O projeto segue os princípios da Clean Architecture com as seguintes camadas:
    - O email do calendário principal: `seu-email@gmail.com`
    - O ID de um calendário secundário (encontrado nas configurações do calendário)
 
-## 🚀 Executando a aplicação
+## 🚀 Executando o servidor MCP
 
 1. Restaure as dependências:
    ```bash
    dotnet restore
    ```
 
-2. Execute a aplicação:
+2. Execute o servidor MCP:
    ```bash
-   dotnet run --project src/WebApi/WebApi.csproj
+   dotnet run --project src/McpServer/McpServer.csproj
    ```
 
-3. Acesse o Swagger:
-   - URL: `https://localhost:5001/swagger` (ou a porta configurada)
+O servidor MCP comunica-se via STDIO (stdin/stdout) seguindo o protocolo MCP.
 
-## 📝 Endpoints
+## 🔧 Ferramentas MCP Disponíveis
 
-- `POST /api/agendamentos` - Criar novo agendamento
-- `GET /api/agendamentos` - Listar todos os agendamentos
-- `GET /api/agendamentos/{id}` - Obter agendamento por ID
-- `PUT /api/agendamentos/{id}` - Atualizar agendamento
-- `DELETE /api/agendamentos/{id}` - Deletar agendamento
+O servidor expõe as seguintes ferramentas:
+
+- `agendar_criar` - Cria um novo agendamento
+- `agendar_consultar` - Consulta agendamentos existentes
+- `agendar_atualizar` - Atualiza um agendamento existente
+- `agendar_deletar` - Deleta um agendamento
+- `agendar_disponibilidade` - Verifica disponibilidade de um horário
+
+Para documentação completa das ferramentas, consulte [Tools/README.md](src/Tools/README.md).
 
 ## ✅ Validações
 
@@ -107,12 +113,11 @@ dotnet test
 ## 📦 Tecnologias
 
 - .NET 8.0
-- ASP.NET Core
+- Model Context Protocol (MCP)
 - Google Calendar API v3
 - FluentValidation
 - AutoMapper
 - Serilog
-- Swagger/OpenAPI
 
 ## 🔒 Segurança
 
@@ -128,6 +133,32 @@ ApiAgendamentos/
 │   ├── Domain/           # Entidades e interfaces de domínio
 │   ├── Application/      # Casos de uso, DTOs, validações
 │   ├── Infrastructure/   # Implementação do Google Calendar
-│   └── WebApi/           # Controllers e configuração
+│   ├── Tools/            # Ferramentas MCP
+│   └── McpServer/        # Servidor MCP
 └── tests/                # Testes unitários
+```
+
+## 🔌 Integração com MCP Clients
+
+Este servidor pode ser usado com:
+
+- **ChatGPT**: Configure como ferramenta customizada
+- **Agentes OpenAI**: Use via MCP SDK
+- **Aplicações MCP Client**: Conecte-se via STDIO
+
+### Exemplo de configuração para ChatGPT
+
+```json
+{
+  "mcpServers": {
+    "agendamentos": {
+      "command": "dotnet",
+      "args": ["run", "--project", "src/McpServer/McpServer.csproj"],
+      "env": {
+        "GOOGLE_CALENDAR_CREDENTIALS_FILE": "google-credentials.json",
+        "GOOGLE_CALENDAR_ID": "seu-email@gmail.com"
+      }
+    }
+  }
+}
 ```
