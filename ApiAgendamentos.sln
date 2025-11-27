@@ -5,21 +5,24 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8CAAA672-3950-4566-B38E-84908F162BDD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "src\Domain\Domain.csproj", "{25A2E6BD-D015-45F7-9D68-2CC632A30965}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "src\Domain\Domain.csproj", "{25A2E6BD-D015-45F7-9D68-2CC632A30965}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "src\Application\Application.csproj", "{D7654114-B869-4C78-B282-C1C8D3F4FC75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "src\Application\Application.csproj", "{D7654114-B869-4C78-B282-C1C8D3F4FC75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "src\Infrastructure\Infrastructure.csproj", "{6CF2FA66-628C-4F63-B4D4-CC489913050B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "src\Infrastructure\Infrastructure.csproj", "{6CF2FA66-628C-4F63-B4D4-CC489913050B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "src\WebApi\WebApi.csproj", "{4B522D99-DBCC-4075-927A-34CBEE8A50D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "src\WebApi\WebApi.csproj", "{4B522D99-DBCC-4075-927A-34CBEE8A50D9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AF697136-3B3C-48DD-95DB-AB7AE33C0F91} = {AF697136-3B3C-48DD-95DB-AB7AE33C0F91}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{BB8D226C-44BD-4D54-8C58-ADD412D2FEF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application.Tests", "tests\Application.Tests\Application.Tests.csproj", "{3F0FE3E0-AFB6-4AB9-98D0-1D67B9D75C18}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application.Tests", "tests\Application.Tests\Application.Tests.csproj", "{3F0FE3E0-AFB6-4AB9-98D0-1D67B9D75C18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.Tests", "tests\Domain.Tests\Domain.Tests.csproj", "{236A8FD6-BD7C-4A43-B275-536574EE53F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain.Tests", "tests\Domain.Tests\Domain.Tests.csproj", "{236A8FD6-BD7C-4A43-B275-536574EE53F6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.Tests", "tests\WebApi.Tests\WebApi.Tests.csproj", "{C0A5A9DA-4428-410E-A64F-BDC915D048A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi.Tests", "tests\WebApi.Tests\WebApi.Tests.csproj", "{C0A5A9DA-4428-410E-A64F-BDC915D048A3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tools", "src\Tools\Tools.csproj", "{981E0182-02B7-435A-9055-718A4897484F}"
 EndProject
@@ -29,9 +32,6 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{25A2E6BD-D015-45F7-9D68-2CC632A30965}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -71,6 +71,9 @@ Global
 		{AF697136-3B3C-48DD-95DB-AB7AE33C0F91}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF697136-3B3C-48DD-95DB-AB7AE33C0F91}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{25A2E6BD-D015-45F7-9D68-2CC632A30965} = {8CAAA672-3950-4566-B38E-84908F162BDD}
 		{D7654114-B869-4C78-B282-C1C8D3F4FC75} = {8CAAA672-3950-4566-B38E-84908F162BDD}
@@ -81,5 +84,8 @@ Global
 		{C0A5A9DA-4428-410E-A64F-BDC915D048A3} = {BB8D226C-44BD-4D54-8C58-ADD412D2FEF4}
 		{981E0182-02B7-435A-9055-718A4897484F} = {8CAAA672-3950-4566-B38E-84908F162BDD}
 		{AF697136-3B3C-48DD-95DB-AB7AE33C0F91} = {8CAAA672-3950-4566-B38E-84908F162BDD}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FDDD3144-D8C0-418E-837A-687DA4DAF4A0}
 	EndGlobalSection
 EndGlobal

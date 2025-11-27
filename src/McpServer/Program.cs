@@ -20,7 +20,7 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     var host = Host.CreateDefaultBuilder(args)
-        .UseSerilog()
+        //.UseSerilog()
         .ConfigureServices((context, services) =>
         {
             var configuration = context.Configuration;

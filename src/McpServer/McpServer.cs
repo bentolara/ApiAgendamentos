@@ -93,6 +93,9 @@ public class McpServer
 
     private McpResponse HandleInitialize()
     {
+        // Registrar todas as ferramentas
+        McpToolRegistry.RegisterAllTools();
+
         return new McpResponse
         {
             Result = new Dictionary<string, object?>
@@ -246,6 +249,17 @@ public class McpServer
         });
 
         await writer.WriteLineAsync(json);
+    }
+    public async Task<string> ProcessRequestAsync(string json)
+    {
+        // 1. Desserializar JSON-RPC
+        var request = JsonSerializer.Deserialize<McpRequest>(json);
+
+        // 2. Executar o método MCP correspondente
+        var response = await HandleRequest(request);
+
+        // 3. Serializar resposta
+        return JsonSerializer.Serialize(response);
     }
 }
 

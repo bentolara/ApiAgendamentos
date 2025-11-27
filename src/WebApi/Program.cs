@@ -4,6 +4,7 @@ using Application.Services;
 using Application.Validators;
 using FluentValidation;
 using Infrastructure.Calendar;
+using McpServer;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,6 +47,9 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddValidatorsFromAssemblyContaining<CriarAgendamentoDtoValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AtualizarAgendamentoDtoValidator>();
 
+// Registrar servidor MCP
+builder.Services.AddSingleton<McpServer.McpServer>();
+
 var app = builder.Build();
 
 // Configurar o pipeline HTTP
@@ -64,5 +68,26 @@ app.UseHttpsRedirection();
 //app.UseAuthorization();
 
 //app.MapControllers();
+
+// Endpoint padrão
+app.MapGet("/", () => "API + MCP ativo");
+
+// Endpoint MCP
+app.MapPost("/mcp", async (HttpContext ctx) =>
+{
+    var server = ctx.RequestServices.GetRequiredService<McpServer.McpServer>();
+
+    // ler json bruto da requisição
+    string json;
+    using (var reader = new StreamReader(ctx.Request.Body))
+        json = await reader.ReadToEndAsync();
+
+    // processar via MCPServer adaptado
+    var result = await server.ProcessRequestAsync(json);
+
+    // retornar JSON-RPC
+    ctx.Response.ContentType = "application/json";
+    await ctx.Response.WriteAsync(result);
+});
 
 app.Run();
