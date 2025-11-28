@@ -121,3 +121,4 @@ Todas as ferramentas retornam:
 ✅ Integração com Google Calendar mantida
 ✅ Documentação completa
 
+

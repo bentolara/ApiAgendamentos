@@ -150,8 +150,83 @@ public class AgendamentoService : IAgendamentoService
         // Deletar evento do Google Calendar
         return await _calendarService.DeleteEventAsync(agendamentoDto.GoogleCalendarEventId);
     }
-
     private Agendamento? MapEventToAgendamento(GoogleCalendarEvent evt)
+    {
+        try
+        {
+
+            if (!evt.ExtendedProperties.TryGetValue("AgendamentoId", out var agendamentoIdStr) ||
+                !Guid.TryParse(agendamentoIdStr, out var agendamentoId))
+            {
+                evt.ExtendedProperties = new Dictionary<string, string>
+                {
+                    { "AgendamentoId", evt.Id.ToString() },
+                    { "Description", evt.Description },
+
+                };
+                agendamentoId = Guid.NewGuid();
+            }
+
+            // Tentar deserializar dados completos da descrição
+            AgendamentoData? data = null;
+            if (!string.IsNullOrWhiteSpace(evt.Description))
+            {
+                try
+                {
+                    data = JsonSerializer.Deserialize<AgendamentoData>(evt.Description);
+                }
+                catch
+                {
+                    // Se não conseguir deserializar, usar dados dos ExtendedProperties
+                    data = new AgendamentoData
+                    {
+                        AgendamentoId = agendamentoIdStr,
+                        ClienteNome = evt.ExtendedProperties.TryGetValue("ClienteNome", out var nome) ? nome : string.Empty,
+                        ClienteTelefone = evt.ExtendedProperties.TryGetValue("ClienteTelefone", out var telefone) ? telefone : string.Empty,
+                        DataHoraInicio = evt.Start,
+                        DataHoraFim = evt.End,
+                        Observacoes = $"{evt.Summary}",
+                        DataCriacao = DateTime.UtcNow
+                    };
+
+                }
+            }
+
+            var agendamento = new Agendamento
+            {
+                Id = agendamentoId,
+                GoogleCalendarEventId = evt.Id,
+                DataHoraInicio = evt.Start,
+                DataHoraFim = evt.End
+            };
+
+            if (data != null)
+            {
+                agendamento.ClienteNome = data.ClienteNome;
+                agendamento.ClienteTelefone = data.ClienteTelefone;
+                agendamento.Observacoes = data.Observacoes;
+                agendamento.DataCriacao = data.DataCriacao;
+                agendamento.DataAtualizacao = data.DataAtualizacao;
+            }
+            else
+            {
+                // Fallback para ExtendedProperties
+                evt.ExtendedProperties.TryGetValue("ClienteNome", out var nome);
+                evt.ExtendedProperties.TryGetValue("ClienteTelefone", out var telefone);
+
+                agendamento.ClienteNome = nome ?? string.Empty;
+                agendamento.ClienteTelefone = telefone ?? string.Empty;
+                agendamento.DataCriacao = DateTime.UtcNow;
+            }
+
+            return agendamento;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+    /*private Agendamento? MapEventToAgendamento(GoogleCalendarEvent evt)
     {
         try
         {
@@ -208,7 +283,7 @@ public class AgendamentoService : IAgendamentoService
         {
             return null;
         }
-    }
+    }*/
 
     private class AgendamentoData
     {

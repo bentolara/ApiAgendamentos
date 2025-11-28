@@ -41,3 +41,4 @@ Antes de executar, certifique-se de:
 
 Para instruções detalhadas, consulte: [GUIA_EXECUCAO_MCP.md](GUIA_EXECUCAO_MCP.md)
 
+
