@@ -3,6 +3,7 @@ using Application.Interfaces;
 using AutoMapper;
 using Domain.Entities;
 using Domain.Exceptions;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace Application.Services;
@@ -155,10 +156,17 @@ public class AgendamentoService : IAgendamentoService
     {
         try
         {
+
             if (!evt.ExtendedProperties.TryGetValue("AgendamentoId", out var agendamentoIdStr) ||
                 !Guid.TryParse(agendamentoIdStr, out var agendamentoId))
             {
-                return null;
+                evt.ExtendedProperties = new Dictionary<string, string>
+                {
+                    { "AgendamentoId", evt.Id.ToString() },
+                    { "Description", evt.Description },
+
+                };
+                agendamentoId = Guid.NewGuid();
             }
 
             // Tentar deserializar dados completos da descrição
@@ -172,6 +180,17 @@ public class AgendamentoService : IAgendamentoService
                 catch
                 {
                     // Se não conseguir deserializar, usar dados dos ExtendedProperties
+                    data = new AgendamentoData 
+                    {
+                        AgendamentoId = agendamentoIdStr,
+                        ClienteNome = evt.ExtendedProperties.TryGetValue("ClienteNome", out var nome) ? nome : string.Empty,
+                        ClienteTelefone = evt.ExtendedProperties.TryGetValue("ClienteTelefone", out var telefone) ? telefone : string.Empty,
+                        DataHoraInicio = evt.Start,
+                        DataHoraFim = evt.End,
+                        Observacoes = $"{evt.Summary }",
+                        DataCriacao = DateTime.UtcNow
+                    };
+
                 }
             }
 
