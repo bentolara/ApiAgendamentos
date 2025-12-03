@@ -4,16 +4,14 @@ using Application.Services;
 using Application.Validators;
 using Domain.Interfaces;
 using FluentValidation;
-using Infrastructure.Persistence;
-using Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
+using Infrastructure.Calendar;
+using McpServer;
 using Serilog;
-using WebApi.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configurar Serilog
-Log.Logger = new LoggerConfiguration()
+/*Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
     .WriteTo.Console()
@@ -36,13 +34,9 @@ builder.Services.AddSwaggerGen(c =>
         Description = "API REST para gerenciamento de agendamentos usando Clean Architecture"
     });
 });
-
-// Configurar Entity Framework Core (InMemory)
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseInMemoryDatabase("AgendamentosDb"));
-
-// Configurar Repositórios
-builder.Services.AddScoped<IAgendamentoRepository, AgendamentoRepository>();
+*/
+// Configurar Google Calendar Service
+builder.Services.AddSingleton<ICalendarService, GoogleCalendarService>();
 
 // Configurar Services
 builder.Services.AddScoped<IAgendamentoService, AgendamentoService>();
@@ -54,23 +48,48 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddValidatorsFromAssemblyContaining<CriarAgendamentoDtoValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AtualizarAgendamentoDtoValidator>();
 
+// Registrar servidor MCP
+builder.Services.AddSingleton<McpServer.McpServer>();
+
 var app = builder.Build();
 
 // Configurar o pipeline HTTP
-if (app.Environment.IsDevelopment())
+/*if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+
 
 // Middleware de tratamento de exceções
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();*/
+app.UseHttpsRedirection();
 
-app.UseAuthorization();
+//app.UseAuthorization();
 
-app.MapControllers();
+//app.MapControllers();
+
+// Endpoint padrão
+app.MapGet("/", () => "API + MCP ativo");
+
+// Endpoint MCP
+app.MapPost("/mcp", async (HttpContext ctx) =>
+{
+    var server = ctx.RequestServices.GetRequiredService<McpServer.McpServer>();
+
+    // ler json bruto da requisição
+    string json;
+    using (var reader = new StreamReader(ctx.Request.Body))
+        json = await reader.ReadToEndAsync();
+
+    // processar via MCPServer adaptado
+    var result = await server.ProcessRequestAsync(json);
+
+    // retornar JSON-RPC
+    ctx.Response.ContentType = "application/json";
+    await ctx.Response.WriteAsync(result);
+});
 
 // Garantir que o banco de dados seja criado
 using (var scope = app.Services.CreateScope())
