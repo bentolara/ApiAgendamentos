@@ -176,3 +176,7 @@ FodyWeavers.xsd
 logs/
 *.log
 
+# Google Calendar credentials
+google-credentials.json
+**/google-credentials.json
+
